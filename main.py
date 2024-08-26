@@ -1,4 +1,5 @@
 import requests
+import xml.etree.ElementTree as ET
 
 # Sett riktig API URL og API-nøkkel
 SEARCH_API_URL = "https://api.doffin.no/public/v2/search"
@@ -30,16 +31,19 @@ if response.status_code == 200:
         download_url = DOWNLOAD_API_URL.format(doffinId=doffin_id)
         download_response = requests.get(download_url, headers=headers)
         
-        # Sjekk om responsen er tom eller ikke i JSON-format
-        if download_response.status_code == 200:
+        # Sjekk om responsen er XML
+        if download_response.status_code == 200 and download_response.headers['Content-Type'] == 'application/xml':
             try:
-                # Forsøk å dekode JSON
-                data = download_response.json()
-                print("Data hentet:", data)
-            except requests.exceptions.JSONDecodeError:
-                # Håndter tilfeller hvor responsen ikke er gyldig JSON
-                print("Responsen er ikke gyldig JSON.")
-                print("Rårespons:", download_response.text)
+                # Parse XML-innholdet
+                root = ET.fromstring(download_response.content)
+                print("XML-data hentet og parslet.")
+                
+                # Eksempel på hvordan du kan trekke ut informasjon fra XML
+                for elem in root.iter():
+                    print(f"{elem.tag}: {elem.text}")
+                
+            except ET.ParseError as e:
+                print(f"Feil ved parsing av XML: {e}")
         else:
             print(f"Feil ved nedlasting av data: {download_response.status_code}")
             print("Rårespons:", download_response.text)
