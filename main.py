@@ -7,9 +7,9 @@ API_KEY = "aa599b89f9884063afb32b71eda08ec3"  # Din API-nøkkel
 
 # Konfigurer søkekriterier
 params = {
-    "numHitsPerPage": 5,  # Øker antall resultater per side
+    "numHitsPerPage": 5,
     "page": 1,
-    "status": "ACTIVE"  # Søker etter aktive utlysninger
+    "status": "ACTIVE"
 }
 
 headers = {
@@ -22,9 +22,7 @@ response = requests.get(SEARCH_API_URL, headers=headers, params=params)
 if response.status_code == 200:
     search_results = response.json()
     
-    # Kontroller at det finnes treff under nøkkelen 'hits'
     if search_results.get('hits'):
-        # Hent første id fra søkeresultatene under 'hits'
         doffin_id = search_results['hits'][0]['id']
         print(f"Fant doffinId: {doffin_id}")
         
@@ -32,13 +30,21 @@ if response.status_code == 200:
         download_url = DOWNLOAD_API_URL.format(doffinId=doffin_id)
         download_response = requests.get(download_url, headers=headers)
         
+        # Sjekk om responsen er tom eller ikke i JSON-format
         if download_response.status_code == 200:
-            print("Data hentet:", download_response.json())
+            try:
+                # Forsøk å dekode JSON
+                data = download_response.json()
+                print("Data hentet:", data)
+            except requests.exceptions.JSONDecodeError:
+                # Håndter tilfeller hvor responsen ikke er gyldig JSON
+                print("Responsen er ikke gyldig JSON.")
+                print("Rårespons:", download_response.text)
         else:
             print(f"Feil ved nedlasting av data: {download_response.status_code}")
+            print("Rårespons:", download_response.text)
     else:
         print("Ingen utlysninger funnet.")
-        # Skriv ut hele responsen for feilsøking
         print("Full respons fra API:", search_results)
 else:
     print(f"Feil ved søk: {response.status_code}")
