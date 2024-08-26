@@ -56,8 +56,8 @@ def main():
                     root = ET.fromstring(xml_data)
                     print("XML-data hentet og parslet.")
                     
-                    # Definer søkeordene, inkludert "drone", "droner" og "UAV"
-                    keywords = ["droner", "UAV", "drone"]
+                    # Definer søkeordene, inkludert "drone", "droner", "UAV", "UTM", "droneflyging", og "RFI"
+                    keywords = ["droner", "UAV", "drone", "UTM", "droneflyging", "RFI"]
                     
                     # Finn relevante treff
                     relevant_entries = find_relevant_keywords(root, keywords)
