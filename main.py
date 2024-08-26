@@ -17,7 +17,7 @@ headers = {
     "Ocp-Apim-Subscription-Key": API_KEY
 }
 
-# Funksjon for å søke etter nøkkelord i XML-data
+# Funksjon for å søke etter nøkkelord i XML-data og returnere hele forelder-elementer
 def find_relevant_keywords(root, keywords):
     relevant_entries = []
     
@@ -26,8 +26,9 @@ def find_relevant_keywords(root, keywords):
         if elem.text:  # Sjekk om elementet har tekst
             for keyword in keywords:
                 if keyword.lower() in elem.text.lower():
-                    # Lagre hele elementet hvis nøkkelordet blir funnet
-                    relevant_entries.append(ET.tostring(elem, encoding='unicode').strip())
+                    # Lagre hele forelder-elementet hvis nøkkelordet blir funnet
+                    relevant_entries.append(ET.tostring(elem.getparent(), encoding='unicode').strip())
+                    break  # Stop iterating through keywords once a match is found
     
     return relevant_entries
 
