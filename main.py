@@ -26,7 +26,8 @@ def find_relevant_keywords(root, keywords):
         if elem.text:  # Sjekk om elementet har tekst
             for keyword in keywords:
                 if keyword.lower() in elem.text.lower():
-                    relevant_entries.append(elem.text.strip())
+                    # Lagre hele elementet hvis nøkkelordet blir funnet
+                    relevant_entries.append(ET.tostring(elem, encoding='unicode').strip())
     
     return relevant_entries
 
@@ -54,7 +55,7 @@ def main():
                     root = ET.fromstring(xml_data)
                     print("XML-data hentet og parslet.")
                     
-                    # Definer søkeordene
+                    # Definer søkeordene, inkludert "drone", "droner" og "UAV"
                     keywords = ["droner", "UAV", "drone"]
                     
                     # Finn relevante treff
@@ -63,7 +64,7 @@ def main():
                     if relevant_entries:
                         print("Relevante treff funnet:")
                         for entry in relevant_entries:
-                            print(f"- {entry}")
+                            print(entry)
                     else:
                         print("Ingen relevante treff funnet.")
                 
