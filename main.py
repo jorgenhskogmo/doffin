@@ -39,8 +39,20 @@ if response.status_code == 200:
                 print("XML-data hentet og parslet.")
                 
                 # Eksempel på hvordan du kan trekke ut informasjon fra XML
-                for elem in root.iter():
-                    print(f"{elem.tag}: {elem.text}")
+                namespaces = {
+                    'cbc': "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2",
+                    'cac': "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+                }
+                
+                # Hente ut spesifikke data, f.eks. "ContractFolderID"
+                contract_id = root.find('.//cbc:ContractFolderID', namespaces)
+                if contract_id is not None:
+                    print(f"ContractFolderID: {contract_id.text}")
+                
+                # Hente ut "Buyer" informasjon
+                buyer_name = root.find('.//cac:PartyName/cbc:Name', namespaces)
+                if buyer_name is not None:
+                    print(f"Kjøper: {buyer_name.text}")
                 
             except ET.ParseError as e:
                 print(f"Feil ved parsing av XML: {e}")
