@@ -6,13 +6,6 @@ SEARCH_API_URL = "https://api.doffin.no/public/v2/search"
 DOWNLOAD_API_URL = "https://api.doffin.no/public/v2/download/{doffinId}"
 API_KEY = "aa599b89f9884063afb32b71eda08ec3"  # Din API-nøkkel
 
-# Konfigurer søkekriterier
-params = {
-    "numHitsPerPage": 5,
-    "page": 1,
-    "status": "ACTIVE,EXPIRED"  # Inkluder både aktiv (ACTIVE) og utgått (EXPIRED)
-}
-
 headers = {
     "Ocp-Apim-Subscription-Key": API_KEY
 }
@@ -32,9 +25,14 @@ def find_relevant_keywords(root, keywords):
     
     return relevant_entries
 
-# Hovedlogikken
-def main():
-    # Gjør søkeforespørselen
+# Funksjon for å hente og filtrere data fra API
+def fetch_and_filter_data(status):
+    params = {
+        "numHitsPerPage": 10,
+        "page": 1,
+        "status": status
+    }
+
     response = requests.get(SEARCH_API_URL, headers=headers, params=params)
 
     if response.status_code == 200:
@@ -43,7 +41,7 @@ def main():
         if search_results.get('hits'):
             for hit in search_results['hits']:
                 doffin_id = hit['id']
-                print(f"Fant doffinId: {doffin_id}")
+                print(f"Fant doffinId: {doffin_id} med status {status}")
                 
                 # Last ned spesifikke detaljer ved hjelp av doffinId
                 download_url = DOWNLOAD_API_URL.format(doffinId=doffin_id)
@@ -57,7 +55,7 @@ def main():
                         root = ET.fromstring(xml_data)
                         print("XML-data hentet og parslet.")
                         
-                        # Definer søkeordene, inkludert "drone", "droner", "UAV", "UTM", "droneflyging", og "RFI"
+                        # Definer søkeordene
                         keywords = ["droner", "UAV", "drone", "UTM", "droneflyging", "RFI"]
                         
                         # Finn relevante treff
@@ -76,11 +74,19 @@ def main():
                     print(f"Feil ved nedlasting av data: {download_response.status_code}")
                     print("Rårespons:", download_response.text)
         else:
-            print("Ingen utlysninger funnet.")
+            print(f"Ingen utlysninger funnet for status {status}.")
             print("Full respons fra API:", search_results)
     else:
-        print(f"Feil ved søk: {response.status_code}")
+        print(f"Feil ved søk for status {status}: {response.status_code}")
         print("Detaljert respons:", response.text)
+
+# Hovedlogikken
+def main():
+    # Hent data for aktive utlysninger
+    fetch_and_filter_data("ACTIVE")
+    
+    # Hent data for utgåtte utlysninger
+    fetch_and_filter_data("EXPIRED")
 
 # Kjør hovedfunksjonen
 if __name__ == "__main__":
