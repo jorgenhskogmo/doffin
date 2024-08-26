@@ -1,9 +1,5 @@
 import requests
 import xml.etree.ElementTree as ET
-import os
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 
 # Sett riktig API URL og API-nøkkel
 SEARCH_API_URL = "https://api.doffin.no/public/v2/search"
@@ -21,41 +17,18 @@ headers = {
     "Ocp-Apim-Subscription-Key": API_KEY
 }
 
-# Funksjon for å søke etter nøkkelord
-def find_relevant_notices(xml_data, keywords):
-    root = ET.fromstring(xml_data)
-    relevant_notices = []
-
+# Funksjon for å søke etter nøkkelord i XML-data
+def find_relevant_keywords(root, keywords):
+    relevant_entries = []
+    
+    # Gå gjennom alle elementene i XML-treet og sjekk om teksten inneholder nøkkelordene
     for elem in root.iter():
         if elem.text:  # Sjekk om elementet har tekst
             for keyword in keywords:
                 if keyword.lower() in elem.text.lower():
-                    relevant_notices.append(elem.text)
+                    relevant_entries.append(elem.text.strip())
     
-    return relevant_notices
-
-# Funksjon for å sende e-post
-def send_email(subject, body, to_email):
-    from_email = os.environ.get('EMAIL')  # Henter e-post fra miljøvariabler
-    password = os.environ.get('PASSWORD')  # Henter passord fra miljøvariabler
-
-    msg = MIMEMultipart()
-    msg['From'] = from_email
-    msg['To'] = to_email
-    msg['Subject'] = subject
-
-    msg.attach(MIMEText(body, 'plain'))
-
-    try:
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
-        server.login(from_email, password)
-        text = msg.as_string()
-        server.sendmail(from_email, to_email, text)
-        server.quit()
-        print("E-post sendt!")
-    except Exception as e:
-        print(f"Feil ved sending av e-post: {e}")
+    return relevant_entries
 
 # Hovedlogikken
 def main():
@@ -78,20 +51,21 @@ def main():
                 try:
                     # Parse XML-innholdet
                     xml_data = download_response.content
+                    root = ET.fromstring(xml_data)
                     print("XML-data hentet og parslet.")
                     
                     # Definer søkeordene
                     keywords = ["droner", "UAV", "drone"]
                     
-                    # Finn relevante utlysninger
-                    relevant_notices = find_relevant_notices(xml_data, keywords)
+                    # Finn relevante treff
+                    relevant_entries = find_relevant_keywords(root, keywords)
                     
-                    if relevant_notices:
-                        # Lag e-postinnholdet
-                        email_body = "\n".join(relevant_notices)
-                        send_email("Relevante utlysninger fra Doffin", email_body, "mottaker_email@gmail.com")
+                    if relevant_entries:
+                        print("Relevante treff funnet:")
+                        for entry in relevant_entries:
+                            print(f"- {entry}")
                     else:
-                        print("Ingen relevante utlysninger funnet.")
+                        print("Ingen relevante treff funnet.")
                 
                 except ET.ParseError as e:
                     print(f"Feil ved parsing av XML: {e}")
