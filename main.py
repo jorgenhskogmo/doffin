@@ -56,7 +56,7 @@ def fetch_and_filter_data(status):
                         print("XML-data hentet og parslet.")
                         
                         # Definer søkeordene
-                        keywords = ["droner", "UAV", "drone", "UTM", "droneflyging", "RFI"]
+                        keywords = ["droner", "UAV", "drone", "UTM", "droneflyging"]
                         
                         # Finn relevante treff
                         relevant_entries = find_relevant_keywords(root, keywords)
