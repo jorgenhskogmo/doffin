@@ -5,11 +5,11 @@ SEARCH_API_URL = "https://api.doffin.no/public/v2/search"
 DOWNLOAD_API_URL = "https://api.doffin.no/public/v2/download/{doffinId}"
 API_KEY = "aa599b89f9884063afb32b71eda08ec3"  # Din API-nøkkel
 
-# Konfigurer søkekriterier
+# Konfigurer søkekriterier - Utvidet søk med flere statuser
 params = {
-    "numHitsPerPage": 2,
-    "page": 1,
-    "status": "ACTIVE"
+    "numHitsPerPage": 5,  # Øker antall resultater per side
+    "page": 1,  # Henter den første siden
+    "status": "ACTIVE,EXPIRED,PLANNED"  # Søker etter flere statuser
 }
 
 headers = {
@@ -36,5 +36,7 @@ if response.status_code == 200:
             print(f"Feil ved nedlasting av data: {download_response.status_code}")
     else:
         print("Ingen utlysninger funnet.")
+        # Skriv ut hele responsen for feilsøking
+        print("Full respons fra API:", search_results)
 else:
     print(f"Feil ved søk: {response.status_code}")
