@@ -81,7 +81,7 @@ def main():
                     print("XML-data hentet og parslet.")
                     
                     # Definer søkeordene
-                    keywords = ["droner", "UAV"]
+                    keywords = ["droner", "UAV", "drone"]
                     
                     # Finn relevante utlysninger
                     relevant_notices = find_relevant_notices(xml_data, keywords)
