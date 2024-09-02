@@ -1,1 +1,1 @@
-worker: python main.py
+worker: python fetch_data.py
